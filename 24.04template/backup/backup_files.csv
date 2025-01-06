@@ -1,0 +1,14 @@
+type,path,name,pemission,owner
+d,/var,www,775 664,lily:lily
+d,/var/local,crontab,770 660,lily:lily
+d,/var/local,backup,770 660,lily:lily
+d,/var/local,scripts,770 660,lily:lily
+f,/etc/php/8.3/apache2,php.ini,755,root:root
+f,/etc,hosts.allow,644,root:root
+f,/etc,hosts.deny,644,root:root
+f,/etc/samba,smb.conf,644,root:root
+f,/etc/apache2,ports.conf,644,root:root
+f,/etc/apache2,apache2.conf,644,root:root
+f,/etc/apache2/sites-available,000-default.conf,644,root:root
+f,/etc/apache2/sites-available,default-ssl.conf,644,root:root
+f,/etc/php/8.3/apache2,php.ini,644,root:root
