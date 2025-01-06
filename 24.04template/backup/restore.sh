@@ -168,6 +168,38 @@
             read newsmbpwd;
             smbpasswd -a $newsmbpwd;
         fi
+
+        echo -e "\nWould you like to create Samba shares for /var/www and /var/local? [y/n]";
+        read answer;
+        if [ $answer == "y" ]; then
+
+            echo -e "\n Specify a space delimited list of users who can access the shares: ";
+            read smbusers;
+            echo -e "\n Specify a space delimited list of hosts and networks that can access the shares: ";
+            read smbhosts;
+
+            echo -e "[local]" >> /etc/samba/smb.conf
+            echo -e "  comment = local directory" >> /etc/samba/smb.conf
+            echo -e "  browseable = yes" >> /etc/samba/smb.conf
+            echo -e "  path = /var/local" >> /etc/samba/smb.conf
+            echo -e "  guest ok = no" >> /etc/samba/smb.conf
+            echo -e "  read only = no" >> /etc/samba/smb.conf
+            echo -e "  create mask = 0660" >> /etc/samba/smb.conf
+            echo -e "  directory mask = 0770" >> /etc/samba/smb.conf
+            echo -e "  valid users = $smbusers" >> /etc/samba/smb.conf
+            echo -e "  hosts allow = $smbhosts" >> /etc/samba/smb.conf
+
+            echo -e "[www]" >> /etc/samba/smb.conf
+            echo -e "  comment = www directory" >> /etc/samba/smb.conf
+            echo -e "  browseable = yes" >> /etc/samba/smb.conf
+            echo -e "  path = /var/www" >> /etc/samba/smb.conf
+            echo -e "  guest ok = no" >> /etc/samba/smb.conf
+            echo -e "  read only = no" >> /etc/samba/smb.conf
+            echo -e "  create mask = 0664" >> /etc/samba/smb.conf
+            echo -e "  directory mask = 0775" >> /etc/samba/smb.conf
+            echo -e "  valid users = $smbusers" >> /etc/samba/smb.conf
+            echo -e "  hosts allow = $smbhosts" >> /etc/samba/smb.conf
+        fi
     fi
 
 # Install Apache
