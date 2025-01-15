@@ -1,11 +1,16 @@
 #!/bin/bash
 
-##### TODO
-# Learn how to edit files rather than replace them
-
 # Set variables
     standarduser="tony";
     phpversion="8.3";
+
+# Start with an apt-get update and upgrade
+    echo -e "\nStart with an update and upgrade? [y/n] ";
+    read answer;
+    if [ $answer == "y" ]; then
+        apt-get -y update;
+        apt-get -y upgrade;
+    fi
 
 # Make user read notes
     echo -e "\n--- Make sure all CSV files read by this script have a trailing LF"
@@ -15,7 +20,7 @@
     read pause;
 
 #Check $standarduser and $phpversion variable values.
-    echo -e "\nThe standard user variable value is $standarduser and PHP is $phpversion. Continue? [y/n] ";
+    echo -e "\nThe standard user variable value is '$standarduser' and PHP is $phpversion. Continue? [y/n] ";
     read answer;
     if [ $answer == "y" ]; then
         echo -e "\nContinuing as $standarduser with PHP $phpversion.";
@@ -23,10 +28,10 @@
     fi
 
 # Open UFW ports
-    echo -e "\nAre there any ports to open up on UFW? [y/n] ";
+    echo -e "\nAre there any ports to open on UFW? [y/n] ";
     read answer;
     if [ $answer == "y" ]; then
-        echo -e "\nSpecify a space delimited list of ports.";
+        echo -e "\nSpecify a space delimited list of ports: ";
         read ports;
         portsArr=(${ports})
         for port in "${portsArr[@]}"
@@ -39,7 +44,7 @@
     echo -e "\nExecute commands in precommands.csv [y/n] ";
     read answer;
     if [ $answer == "y" ]; then
-        while IFS="," read -r command
+        while read -r command
         do
             echo -e "#/bin/bash" > temp.sh;
             echo -e $command >> temp.sh;
@@ -53,7 +58,7 @@
     echo -e "\nWould you like to create another Unix user? [y/n] ";
     read answer;
     if [ $answer == "y" ]; then
-        echo -e "\nWhat is the new user's username?";
+        echo -e "\nWhat is the new user's username? ";
         read newuser;
         mkdir "/home/$newuser";
         useradd -d "/home/$newuser" $newuser;
@@ -61,7 +66,7 @@
         chown $newuser:$newuser "/home/$newuser";
         passwd $newuser;
         
-        echo -e "\nShould $newuser be a sudoer? [y/n]";
+        echo -e "\nShould $newuser be a sudoer? [y/n] ";
         read answer;
         if [ $answer == "y" ]; then
             usermod -aG sudo $newuser;
@@ -81,15 +86,9 @@
     fi
 
 # Mount external disk at startup
-    echo -e "\nWould you like to mount an external disk at startup? [y/n] ";
+    echo -e "\nWould you like to mount an already partitioned and formatted external disk at startup? [y/n] ";
     read answer;
     if [ $answer == "y" ]; then
-        echo -e "\nIf the disk is not partitioned and formatted, exit and use fdisk to partiton and 'mkfs -t ext4 /var/local/externaldisk' to partition. Continue? [y/n]";
-        read cont;
-        if [ ! $cont == "y" ]; then
-            exit;
-        fi
-
         echo -e "\nWhat is the full path of the local directory on which you would like to mount the disk? ";
         read localdir;
         if [ ! -d "$localdir" ]; then
@@ -98,7 +97,7 @@
 
         echo -e "\n";
         ls -l /dev | grep disk;
-        echo -e "\nSee output above. What is the full /dev path to the disk?";
+        echo -e "\nSee output above. What is the full /dev path to the disk? ";
         read devpath;
 
         echo -e "\n";
@@ -107,7 +106,7 @@
         read uuid;
 
         echo "UUID=$uuid $localdir ext4 defaults 0 0" >> /etc/fstab;
-        echo -e "\nMount it now? [y/n]";
+        echo -e "\nMount it now? [y/n] ";
         read answer;
         if [ $answer == "y" ]; then
             mount $devpath $localdir;
@@ -126,7 +125,7 @@
     echo -e "\nWould you like to run SSH on a port other than 22? [y/n] ";
     read answer;
     if [ $answer == "y" ]; then
-        echo -e "On what port would you like to run SSH? ";
+        echo -e "\nOn what port would you like to run SSH? ";
         read sshport;
         findport="#Port 22";
         replaceport="Port $sshport";
@@ -134,7 +133,7 @@
         mv /etc/ssh/sshd_config /etc/ssh/sshd_config.bak;
         touch /etc/ssh/sshd_config;
 
-        while read -r line
+        while IFS='' read -r line
         do
             if [[ "$line" == *"$findport"* ]]; then
                 echo $replaceport >> /etc/ssh/sshd_config;
@@ -158,13 +157,13 @@
     read answer;
     if [ $answer == "y" ]; then
         apt-get -y install samba;
-        echo -e "\nSetting password for $standarduser.";
+        echo -e "\nSetting password for $standarduser: ";
         smbpasswd -a $standarduser;
         
-        echo -e "\nWould you like to set a Samba password for another user? [y/n]";
+        echo -e "\nWould you like to set a Samba password for another user? [y/n] ";
         read answer;
         if [ $answer == "y" ]; then
-            echo -e "\nWhat is the name of the user for which you would like to set a Samba password?";
+            echo -e "\nWhat is the name of the user for which you would like to set a Samba password? ";
             read newsmbpwd;
             smbpasswd -a $newsmbpwd;
         fi
@@ -173,9 +172,9 @@
         read answer;
         if [ $answer == "y" ]; then
 
-            echo -e "\n Specify a space delimited list of users who can access the shares: ";
+            echo -e "\nSpecify a space delimited list of users who can access the shares: ";
             read smbusers;
-            echo -e "\n Specify a space delimited list of hosts and networks that can access the shares: ";
+            echo -e "\nSpecify a space delimited list of hosts and networks that can access the shares: ";
             read smbhosts;
 
             echo -e "[local]" >> /etc/samba/smb.conf
@@ -189,7 +188,7 @@
             echo -e "  valid users = $smbusers" >> /etc/samba/smb.conf
             echo -e "  hosts allow = $smbhosts" >> /etc/samba/smb.conf
 
-            echo -e "[www]" >> /etc/samba/smb.conf
+            echo -e "\n[www]" >> /etc/samba/smb.conf
             echo -e "  comment = www directory" >> /etc/samba/smb.conf
             echo -e "  browseable = yes" >> /etc/samba/smb.conf
             echo -e "  path = /var/www" >> /etc/samba/smb.conf
@@ -212,13 +211,84 @@
         a2ensite default-ssl;
         service apache2 restart;
         chown -R $standarduser:$standarduser /var/www;
+
+        mv /etc/apache2/sites-available/default-ssl.conf /etc/apache2/sites-available/default-ssl.conf.bak2;
+        mv /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/000-default.conf.bak2;
+
+        finddocroot="DocumentRoot /var/www/html";
+        replacedocroot="        DocumentRoot /var/www";
+
+        while IFS='' read -r line
+        do
+            if [[ "$line" == *"$finddocroot"* ]]; then
+                echo $replacedocroot >> /etc/apache2/sites-available/default-ssl.conf;
+            else
+                echo $line >> /etc/apache2/sites-available/default-ssl.conf;
+            fi 
+        done < /etc/apache2/sites-available/default-ssl.conf.bak2
+
+        while IFS='' read -r line
+        do
+            if [[ "$line" == *"$finddocroot"* ]]; then
+                echo $replacedocroot >> /etc/apache2/sites-available/000-default.conf;
+            else
+                echo $line >> /etc/apache2/sites-available/000-default.conf;
+            fi 
+        done < /etc/apache2/sites-available/000-default.conf.bak2
+
+        echo -e "\nWould you like to run HTTP and HTTPS on a ports other than 80 and 443? [y/n] ";
+        read answer;
+        if [ $answer == "y" ]; then
+            echo -e "\nOn what port would you like to run HTTP? ";
+            read httpport;
+            echo -e "\nOn what port would you like to run HTTPS? ";
+            read httpsport;
+
+            mv /etc/apache2/ports.conf /etc/apache2/ports.conf.bak;
+
+            echo -e "Listen $httpport" > /etc/apache2/ports.conf;
+            echo -e "<IfModule ssl_module>" >> /etc/apache2/ports.conf;
+            echo -e "	Listen $httpsport" >> /etc/apache2/ports.conf;
+            echo -e "</IfModule>" >> /etc/apache2/ports.conf;
+            echo -e "<IfModule mod_gnutls.c>" >> /etc/apache2/ports.conf;
+            echo -e "	Listen $httpsport" >> /etc/apache2/ports.conf;
+            echo -e "</IfModule>" > /etc/apache2/ports.conf;
+
+            mv /etc/apache2/sites-available/default-ssl.conf /etc/apache2/sites-available/default-ssl.conf.bak;
+            mv /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/000-default.conf.bak;
+
+            findhttp="<VirtualHost *:80>";
+            replacehttp="<VirtualHost *:$httpport>";
+            findhttps="<VirtualHost *:443>";
+            replacehttps="<VirtualHost *:$httpsport>";
+
+            while IFS='' read -r line
+            do
+                if [[ "$line" == *"$findhttps"* ]]; then
+                    echo $replacehttps >> /etc/apache2/sites-available/default-ssl.conf;
+                else
+                    echo $line >> /etc/apache2/sites-available/default-ssl.conf;
+                fi 
+            done < /etc/apache2/sites-available/default-ssl.conf.bak
+
+            while IFS='' read -r line
+            do
+                if [[ "$line" == *"$findhttp"* ]]; then
+                    echo $replacehttp >> /etc/apache2/sites-available/000-default.conf;
+                else
+                    echo $line >> /etc/apache2/sites-available/000-default.conf;
+                fi 
+            done < /etc/apache2/sites-available/000-default.conf.bak
+
+        fi
     fi
 
 # Generate a self-signed TLS certificate for web traffic
     echo -e "\nGenerate a self-signed TLS certificate for web traffic? [y/n] ";
     read answer;
     if [ $answer == "y" ]; then
-        echo -e "\nWhat do you want to name the certificate? Recommendation: mycert: ";
+        echo -e "\nYou will be prompted for a certificate password, type one even if you don't want one.";
+        echo -e "What do you want to name the certificate? Recommendation: mycert: ";
         read certname;
         openssl genrsa -des3 -out $certname.key 4096;
         openssl req -new -key $certname.key -out $certname.csr;
@@ -235,7 +305,9 @@
         echo -e "\n$certname.cer copied to /etc/ssl/certs.";
         echo -e "$certname.key copied to /etc/ssl/private.";
 
-        echo -e "\nChange default-ssl.conf to reference the new certificate? [y/n]";
+        echo -e "\nIf default-ssl.conf is at it's defaults referencing the snakeoil certs, this script can update it.";
+        echo -e "Change default-ssl.conf to reference the new certificate? [y/n] ";
+        read answer;
         if [ $answer == "y" ]; then
             findcert="/etc/ssl/certs/ssl-cert-snakeoil.pem";
             replacecert="	SSLCertificateFile      /etc/ssl/certs/mycert.crt";
@@ -245,7 +317,7 @@
             mv /etc/apache2/sites-available/default-ssl.conf /etc/apache2/sites-available/default-ssl.conf.bak;
             touch /etc/apache2/sites-available/default-ssl.conf;
 
-            while read -r line
+            while IFS='' read -r line
             do
                 if [[ "$line" == *"$findcert"* ]]; then
                     echo $replacecert >> /etc/apache2/sites-available/default-ssl.conf;
@@ -257,13 +329,13 @@
             done < /etc/apache2/sites-available/default-ssl.conf.bak
         fi
 
-        echo -e "\nOpen /etc/apache2/sites-available/default-ssl.conf to make sure the certificate path is correct? [y/n]";
+        echo -e "\nOpen /etc/apache2/sites-available/default-ssl.conf to make sure the certificate path is correct? [y/n] ";
         read answer;
         if [ $answer == "y" ]; then
             nano /etc/apache2/sites-available/default-ssl.conf;
         fi
 
-        echo "\nRestart Apache? [y/n]";
+        echo -e "\nRestart Apache? [y/n]";
         read answer;
         if [ $answer == "y" ]; then
             service apache2 restart;
@@ -283,6 +355,7 @@
     read answer;
     if [ $answer == "y" ]; then
         apt-get -y install mysql-server;
+        apt-get install python3-mysql.connector;
 
         echo -e "\nWhat do you want to use for a MySQL admin username? ";
         read mysqluser;
@@ -310,10 +383,10 @@
         mysql --user=root mysql -e "CREATE USER '$cli_mysqluser'@'localhost' IDENTIFIED BY '$cli_mysqlpass';";
         mysql --user=root mysql -e "GRANT PROCESS ON *.* TO '$cli_mysqluser'@'localhost';";
 
-        echo -e "\nWould you like to import the MySQL databases in mysqldbs.csv? [y/n]";
+        echo -e "\nWould you like to import the MySQL databases in mysqldbs.csv? [y/n] ";
         read answer;
         if [ $answer == "y" ]; then
-            while IFS="," read -r mysqldb
+            while read -r mysqldb
             do
                 mysql --user=root mysql -e "create database $mysqldb";
                 cat ../$mysqldb.sql | mysql -D $mysqldb --user=root;
@@ -352,48 +425,42 @@
         chown $standarduser:www-data "/var/cons/inc-db.php";
         chown $standarduser:$standarduser "/var/cons/inc-db.sh";
         chown $standarduser:$standarduser "/var/cons/incdb.py";
-        
-        echo -e "\nWould you like to install the Python / MySQL connector? [y/n]";
-        read answer;
-        if [ $answer == "y" ]; then
-            apt-get install python3-mysql.connector;
-        fi
-        echo -e "\nLook at the code of this script for information on Python CRUD.";
     fi
 
+#######################Python CRUD script
 #!/usr/bin/python3
 
-# import mysql.connector;
-# import sys;
-# sys.path.insert(1, '/var/cons');
-# import incdb;
+    # import mysql.connector;
+    # import sys;
+    # sys.path.insert(1, '/var/cons');
+    # import incdb;
 
-# mysql_query = incdb.con.cursor();
+    # mysql_query = incdb.con.cursor();
 
-##### Create
-# mysql_query.execute("INSERT INTO jobitable (jobifield1, jobifield2) VALUES ('insert into field1a', 'insert into field2a')");
+    ##### Create
+    # mysql_query.execute("INSERT INTO jobitable (jobifield1, jobifield2) VALUES ('insert into field1a', 'insert into field2a')");
 
-# ##### Update
-# mysql_query.execute("UPDATE mytable SET myfield = 'Updated myfield1' WHERE id = 7");
+    # ##### Update
+    # mysql_query.execute("UPDATE mytable SET myfield = 'Updated myfield1' WHERE id = 7");
 
-# ##### Read
-# mysql_query.execute("SELECT * FROM testtable1");
-# records = mysql_query.fetchall();
+    # ##### Read
+    # mysql_query.execute("SELECT * FROM testtable1");
+    # records = mysql_query.fetchall();
 
-# for rec in records:
-#     print(str(rec[1]));
-#     print(str(rec[2]));
- 
-# ##### Read One
-# mysql_query.execute("SELECT myfield FROM mytable WHERE id = 8");
-# record = mysql_query.fetchone();
+    # for rec in records:
+    #     print(str(rec[1]));
+    #     print(str(rec[2]));
+    
+    # ##### Read One
+    # mysql_query.execute("SELECT myfield FROM mytable WHERE id = 8");
+    # record = mysql_query.fetchone();
 
-# print(record[0]);
- 
-# ##### Delete
-# mysql_query.execute("DELETE FROM mytable WHERE id > 0");
+    # print(record[0]);
+    
+    # ##### Delete
+    # mysql_query.execute("DELETE FROM mytable WHERE id > 0");
 
-# incdb.con.commit();incdb.con.close();
+    # incdb.con.commit();incdb.con.close();
 
 
 # Install PHPMyAdmin
@@ -401,6 +468,36 @@
     read answer;
     if [ $answer == "y" ]; then
         apt-get -y install phpmyadmin;
+        echo -e "Would you like to restrict PHPMyAdmin to a specific network? [y/n] ";
+        read answer;
+        if [ $answer == "y" ]; then
+            echo -e "What network should be allowed to access PHPMyAdmin. For example, 10.0.0.0/255.255.255.0: ";
+            read phpmyadminpermit;
+
+            mv /etc/apache2/apache2.conf /etc/apache2/apache2.conf.bak;
+
+            phpmaFL="<Directory /usr/share/phpmyadmin>";
+            phpmaLL="</Directory>";
+            startRemove="0";
+
+            while IFS='' read -r line; do
+                if [[ "$line" == *"$phpmaFL"* ]]; then
+                    startRemove="1";
+                elif [[ "$line" == *"$phpmaLL"* ]] && [[ "$startRemove" == "1" ]]; then
+                    startRemove="0";
+                    echo -e "<Directory /usr/share/phpmyadmin>" >> /etc/apache2/apache2.conf;
+                    echo -e "        AllowOverride None" >> /etc/apache2/apache2.conf;
+                    echo -e "        Require all granted" >> /etc/apache2/apache2.conf;
+                    echo -e "        Order Deny,Allow" >> /etc/apache2/apache2.conf;
+                    echo -e "        Deny from all" >> /etc/apache2/apache2.conf;
+                    echo -e "        Allow from 127.0.0.1" >> /etc/apache2/apache2.conf;
+                    echo -e "        Allow from $phpmyadminpermit" >> /etc/apache2/apache2.conf;
+                    echo -e "</Directory>" >> /etc/apache2/apache2.conf;
+                elif [[ "$startRemove" == "0" ]]; then
+                    echo -e "$line" >> /etc/apache2/apache2.conf
+                fi
+            done < /etc/apache2/apache2.conf.bak
+        fi
     fi
 
 # Restore files and directories
@@ -438,7 +535,7 @@
     echo -e "\nRestore crontabs specified in crontabs.csv? [y/n] ";
     read answer;
     if [ $answer == "y" ]; then
-        while IFS="," read -r user
+        while read -r user
         do
             crontab -u $user "../crontab_$user.txt";
         done < crontabs.csv
@@ -460,13 +557,14 @@
 
         echo -e "\n....................................................................................................................";
         echo -e "\nMUTT will be setup to work with a Gmail account. If you are using another provider, you can tweak the settings later.";
-        echo -e "\nType the portion of the gmail address before the @. In other words, do not write the @gmail.com part.";
+        echo -e "\nType the portion of the sending gmail address before the @. In other words, do not write the @gmail.com part.";
         read sender_email;
 
-        echo -e "\nWhat is the app specific password?";
-        echo -e "You can generate an app specific password at https://myaccount.google.com/apppasswords";
+        echo -e "\nYou can generate an app specific password at https://myaccount.google.com/apppasswords";
         echo -e "Your app specific password should have no spaces in it.";
-        echo -e "You will not see the app sepecific password as you type it.";
+        echo -e "You will not see the app sepecific password as you type it or paste it.";
+        echo -e "What is the app specific password? ";
+
         read -s sender_app_pass;
 
         echo -e "\nWhat is the sender's display name?";
@@ -510,30 +608,30 @@
     fi
 
 ##### Using the muttsend.sh script via PHP
-# <?php
-# echo "You must execute this script as the user for whom MUTT was configured.";
-# $notify_script = "/var/cons/muttsend.sh";
-# $notify_recipients = "me@yahoo.com";
-# $notify_subject = "TheSubject2";
-# $message = "TheBody2";
-# exec("{$notify_script} {$notify_recipients} '{$notify_subject}' '{$message}'");
-# ?>
+    # <?php
+    # echo "You must execute this script as the user for whom MUTT was configured.";
+    # $notify_script = "/var/cons/muttsend.sh";
+    # $notify_recipients = "me@yahoo.com";
+    # $notify_subject = "TheSubject2";
+    # $message = "TheBody2";
+    # exec("{$notify_script} {$notify_recipients} '{$notify_subject}' '{$message}'");
+    # ?>
 
-##### Using the muttsend.sh script via Python
-# #!/usr/bin/env python3
-# import subprocess;
-# notify_script = "sudo -u tony /var/cons/muttsend.sh";
-# notify_recipients = "me@gmail.com";
-# notify_subject = "This is the subject.";
-# message = "This is the message";
-# subprocess.call(notify_script+" '"+notify_recipients+"' '"+notify_subject+"' '"+message+"'",shell=True);
+    ##### Using the muttsend.sh script via Python
+    # #!/usr/bin/env python3
+    # import subprocess;
+    # notify_script = "sudo -u tony /var/cons/muttsend.sh";
+    # notify_recipients = "me@gmail.com";
+    # notify_subject = "This is the subject.";
+    # message = "This is the message";
+    # subprocess.call(notify_script+" '"+notify_recipients+"' '"+notify_subject+"' '"+message+"'",shell=True);
 
 
 # Execute commands in postcommands.csv
-    echo -e "\nExecute commands in postcommands.csv [y/n] ";
+    echo -e "\nExecute commands in postcommands.csv? [y/n] ";
     read answer;
     if [ $answer == "y" ]; then
-        while IFS="," read -r command
+        while read -r command
         do
             echo -e "#/bin/bash" > temp.sh;
             echo -e $command >> temp.sh;
@@ -544,7 +642,7 @@
     fi
 
 #Create an HTAccess Directory
-    echo -e "\nWould you like to create an HTAccess directory?";
+    echo -e "\nWould you like to create an HTAccess directory? [y/n] ";
     read answer;
     if [ $answer == "y" ]; then
         echo -e "\nWhat is the path to the directory that you want to protect? Example: /var/www/private";
@@ -583,10 +681,16 @@
     unset HISTFILE;
     rm /root/.bash_history;
 
+# Final Notes
+    echo -e "\n..............................FINAL NOTES................";
+    echo -e "--- Test MUTT and the connection to the DB for PHP, Python, and BASH.";
+    echo -e "--- Test the database connection at http://ipaddress/misc/testdb.php";
+    echo -e "--- Make sure the database is backing up and time is correct.";
+    echo -e "--- Get the /var/local/externaldisk/remotebackup folder backing up offsite.";
+    
 # Restart the server
-    echo -e "\nThanks for using this restore script! You might need to restart for some setting to take affect. Restart [y/n]";
+    echo -e "\nYou might need to restart for some setting to take affect. Restart? [y/n] ";
     read answer;
     if [ $answer == "y" ]; then
         shutdown -r now;
     fi
-
