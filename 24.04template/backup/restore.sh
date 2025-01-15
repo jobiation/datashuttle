@@ -473,7 +473,7 @@
         if [ $answer == "y" ]; then
             echo -e "What network should be allowed to access PHPMyAdmin. For example, 10.0.0.0/255.255.255.0: ";
             read phpmyadminpermit;
-            echo -e "<Directory /usr/share/phpmyadmin>" >> /etc/apache2/apache2.conf;
+            echo -e "\n<Directory /usr/share/phpmyadmin>" >> /etc/apache2/apache2.conf;
             echo -e "        AllowOverride None" >> /etc/apache2/apache2.conf;
             echo -e "        Require all granted" >> /etc/apache2/apache2.conf;
             echo -e "        Order Deny,Allow" >> /etc/apache2/apache2.conf;

@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # Set variables
-    delolderthan=7200; #In minutes
+    delolderthan=28800; #In minutes
     currentdate=`date '+%Y%m%d'`;
     local_backup_dir="/var/local/externaldisk/localbackup";
     current_backup_dir="$local_backup_dir/$currentdate";
     remote_backup_dir="/var/local/externaldisk/remotebackup";
     db_con="/var/cons/inc-db.sh";
-    standarduser="tony";
+    standarduser="lily";
 
 # Change directory to /var/local/backup
     cd /var/local/backup;
@@ -33,12 +33,10 @@
     fi
     done < backup_files.csv
 
-# Insert the time in the database
-    /usr/bin/php8.3 /var/local/backup/inserttime.php;
-
 # Export databases
     while IFS="," read -r mysqldb
     do
+        /usr/bin/php8.3 /var/local/backup/inserttime.php $mysqldb;
         /usr/bin/mysqldump -u $mysqluser -p$mysqlpass $mysqldb > $current_backup_dir/$mysqldb.sql
     done < mysqldbs.csv
 
@@ -61,7 +59,7 @@
     fi
 
 # Create tarchive in the remote backup directory
-    tar -cf $remote_backup_dir/$currentdate.tar $current_backup_dir;
+    tar --recursive-unlink -cf $remote_backup_dir/$currentdate.tar $current_backup_dir;
 
 # Make sure you are at the remote backup directory
     cd $remote_backup_dir;
