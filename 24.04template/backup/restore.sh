@@ -252,7 +252,7 @@
             echo -e "</IfModule>" >> /etc/apache2/ports.conf;
             echo -e "<IfModule mod_gnutls.c>" >> /etc/apache2/ports.conf;
             echo -e "	Listen $httpsport" >> /etc/apache2/ports.conf;
-            echo -e "</IfModule>" > /etc/apache2/ports.conf;
+            echo -e "</IfModule>" >> /etc/apache2/ports.conf;
 
             mv /etc/apache2/sites-available/default-ssl.conf /etc/apache2/sites-available/default-ssl.conf.bak;
             mv /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/000-default.conf.bak;
@@ -473,30 +473,14 @@
         if [ $answer == "y" ]; then
             echo -e "What network should be allowed to access PHPMyAdmin. For example, 10.0.0.0/255.255.255.0: ";
             read phpmyadminpermit;
-
-            mv /etc/apache2/apache2.conf /etc/apache2/apache2.conf.bak;
-
-            phpmaFL="<Directory /usr/share/phpmyadmin>";
-            phpmaLL="</Directory>";
-            startRemove="0";
-
-            while IFS='' read -r line; do
-                if [[ "$line" == *"$phpmaFL"* ]]; then
-                    startRemove="1";
-                elif [[ "$line" == *"$phpmaLL"* ]] && [[ "$startRemove" == "1" ]]; then
-                    startRemove="0";
-                    echo -e "<Directory /usr/share/phpmyadmin>" >> /etc/apache2/apache2.conf;
-                    echo -e "        AllowOverride None" >> /etc/apache2/apache2.conf;
-                    echo -e "        Require all granted" >> /etc/apache2/apache2.conf;
-                    echo -e "        Order Deny,Allow" >> /etc/apache2/apache2.conf;
-                    echo -e "        Deny from all" >> /etc/apache2/apache2.conf;
-                    echo -e "        Allow from 127.0.0.1" >> /etc/apache2/apache2.conf;
-                    echo -e "        Allow from $phpmyadminpermit" >> /etc/apache2/apache2.conf;
-                    echo -e "</Directory>" >> /etc/apache2/apache2.conf;
-                elif [[ "$startRemove" == "0" ]]; then
-                    echo -e "$line" >> /etc/apache2/apache2.conf
-                fi
-            done < /etc/apache2/apache2.conf.bak
+            echo -e "<Directory /usr/share/phpmyadmin>" >> /etc/apache2/apache2.conf;
+            echo -e "        AllowOverride None" >> /etc/apache2/apache2.conf;
+            echo -e "        Require all granted" >> /etc/apache2/apache2.conf;
+            echo -e "        Order Deny,Allow" >> /etc/apache2/apache2.conf;
+            echo -e "        Deny from all" >> /etc/apache2/apache2.conf;
+            echo -e "        Allow from 127.0.0.1" >> /etc/apache2/apache2.conf;
+            echo -e "        Allow from $phpmyadminpermit" >> /etc/apache2/apache2.conf;
+            echo -e "</Directory>" >> /etc/apache2/apache2.conf;
         fi
     fi
 
