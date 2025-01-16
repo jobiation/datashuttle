@@ -76,7 +76,7 @@
     find $remote_backup_dir -type d -print0 | xargs -I {} -0 chmod 0770 {}
 
 # Overwrite permissions on clone and push scripts.
-    chmod 770 $remote_backup_dir/push.sh;
+    # chmod 770 $remote_backup_dir/push.sh;
 
 # Remove history
     history -c && history -w;

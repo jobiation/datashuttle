@@ -671,7 +671,6 @@
     echo -e "--- Test the database connection at http://ipaddress/misc/testdb.php";
     echo -e "--- Make sure the database is backing up and time is correct.";
     echo -e "--- Get the /var/local/externaldisk/remotebackup folder backing up offsite.";
-    echo -e "--- Get the /var/local/externaldisk/remotebackup folder backing up offsite.";
     
 # Restart the server
     echo -e "\nYou might need to restart for some setting to take affect. Restart? [y/n] ";
