@@ -31,7 +31,7 @@
     echo -e "\nAre there any ports to open on UFW? [y/n] ";
     read answer;
     if [ $answer == "y" ]; then
-        echo -e "\nSpecify a space delimited list of ports: ";
+        echo -e "\nSpecify a space delimited list of ports. Example 65022 65080 65443";
         read ports;
         portsArr=(${ports})
         for port in "${portsArr[@]}"
@@ -146,7 +146,7 @@
     echo -e "\nWould you like to restrict SSH to only certain IPs? [y/n] ";
     read answer;
     if [ $answer == "y" ]; then
-        echo -e "Specify a comma separated list of IPs and networks that will be able to access this server via ssh: ";
+        echo -e "Specify a comma separated list of IPs and networks that will be able to access this server via ssh. Example: 10.0.1.0/24,10.0.0.4 ";
         read sshpermit;
         echo "sshd: $sshpermit" >> /etc/hosts.allow
         echo "sshd: ALL" >> /etc/hosts.deny
@@ -174,7 +174,7 @@
 
             echo -e "\nSpecify a space delimited list of users who can access the shares: ";
             read smbusers;
-            echo -e "\nSpecify a space delimited list of hosts and networks that can access the shares: ";
+            echo -e "\nSpecify a space delimited list of hosts and networks that can access the shares. Example: 10.0.1.0/24 10.0.0.4 ";
             read smbhosts;
 
             echo -e "[local]" >> /etc/samba/smb.conf
@@ -368,14 +368,14 @@
 
         mysql --user=root mysql -e "set persist local_infile = 1;";
 
-        echo -e "\nType a username for a PHP / Python MySQL user? ";
+        echo -e "\nType a username for a PHP / Python MySQL user? Recommended: mysqlappadmin";
         read php_mysqluser;
         echo -e "\nType a MySQL password for $php_mysqluser";
         read -s php_mysqlpass;
 
         mysql --user=root mysql -e "CREATE USER '$php_mysqluser'@'localhost' IDENTIFIED BY '$php_mysqlpass';";
 
-        echo -e "\nType a username for a CLI MySQL user? ";
+        echo -e "\nType a username for a CLI MySQL user? Recommended: mysqlcliadmin";
         read cli_mysqluser;
         echo -e "\nType a MySQL password for $cli_mysqluser";
         read -s cli_mysqlpass;
