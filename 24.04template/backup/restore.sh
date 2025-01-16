@@ -400,7 +400,7 @@
 
         rm -rf /var/cons;
         mkdir /var/cons;
-        chmod 770 /var/cons;
+        chmod 775 /var/cons;
         chown $standarduser:$standarduser /var/cons;
 
         echo -e "<?php" > "/var/cons/inc-db.php";
@@ -408,7 +408,7 @@
         echo -e "\$username = '$php_mysqluser';" >> "/var/cons/inc-db.php";
         echo -e "\$password = '$php_mysqlpass';" >> "/var/cons/inc-db.php";
         echo -e "\$con = new mysqli(\$servername, \$username, \$password, \$db);" >> "/var/cons/inc-db.php";
-        echo -e "if (\$con->connect_error) {die("Connection failed: " . \$con->connect_error);}" >> "/var/cons/inc-db.php";
+        echo -e "if (\$con->connect_error) {die(\"Connection failed: \" . \$con->connect_error);}" >> "/var/cons/inc-db.php";
         echo -e "?>" >> "/var/cons/inc-db.php";
 
         echo -e "#!/bin/bash" > "/var/cons/inc-db.sh";
@@ -556,7 +556,7 @@
 
         echo -e "\nWhat is the name of the unix user who will be sending emails? Example: tony";
         read unix_emailer;
-        echo -e "\nWhat is the name of the unix group that will be sending emails? Example: www-data";
+        echo -e "\nWhat is the name of the unix group that will be sending emails? Recommended: www-data";
         read unix_group;
         echo -e "\nWhat is the MUTT home directory? Recommended: /var/cons";
         read mutthome;
@@ -637,7 +637,7 @@
         read htuser;
         
         mkdir -p $htpath;
-        chmod 644 $htpath;
+        chmod 755 $htpath;
         chown $standarduser:$standarduser $htpath;
 
         htpasswd -c /var/cons/$htfile $htuser;
@@ -649,7 +649,7 @@
         echo -e "AuthUserFile /var/cons/$htfile" >> $htpath/.htaccess;
         echo -e "require valid-user" >> $htpath/.htaccess;
         chmod 640 $htpath/.htaccess;
-        chown $standarduser:$standarduser $htpath/.htaccess;
+        chown $standarduser:www-data $htpath/.htaccess;
 
         echo -e "\n<Directory $htpath>" >> /etc/apache2/apache2.conf;
         echo -e "        Options Indexes FollowSymLinks" >> /etc/apache2/apache2.conf;
@@ -670,6 +670,7 @@
     echo -e "--- Test MUTT and the connection to the DB for PHP, Python, and BASH.";
     echo -e "--- Test the database connection at http://ipaddress/misc/testdb.php";
     echo -e "--- Make sure the database is backing up and time is correct.";
+    echo -e "--- Get the /var/local/externaldisk/remotebackup folder backing up offsite.";
     echo -e "--- Get the /var/local/externaldisk/remotebackup folder backing up offsite.";
     
 # Restart the server

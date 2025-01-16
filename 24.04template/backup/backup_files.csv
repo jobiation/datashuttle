@@ -1,8 +1,8 @@
 type,path,name,pemission,owner
-d,/var,www,775 664,lily:lily
-d,/var/local,crontab,770 660,lily:lily
-d,/var/local,backup,770 660,lily:lily
-d,/var/local,scripts,770 660,lily:lily
+d,/var,www,775 664,tony:tony
+d,/var/local,crontab,770 660,tony:tony
+d,/var/local,backup,770 660,tony:tony
+d,/var/local,scripts,770 660,tony:tony
 bak.f,/etc,hosts.allow,644,root:root
 bak.f,/etc,hosts.deny,644,root:root
 bak.f,/etc/samba,smb.conf,644,root:root
