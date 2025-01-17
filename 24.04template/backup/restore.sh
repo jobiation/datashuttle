@@ -412,8 +412,8 @@
         echo -e "?>" >> "/var/cons/inc-db.php";
 
         echo -e "#!/bin/bash" > "/var/cons/inc-db.sh";
-        echo -e "\$mysqluser='$cli_mysqluser';" >> "/var/cons/inc-db.sh";
-        echo -e "\$mysqlpass='$cli_mysqlpass';" >> "/var/cons/inc-db.sh";
+        echo -e "mysqluser='$cli_mysqluser';" >> "/var/cons/inc-db.sh";
+        echo -e "mysqlpass='$cli_mysqlpass';" >> "/var/cons/inc-db.sh";
 
         echo -e "#!/usr/bin/python3" > "/var/cons/incdb.py";
         echo -e "import mysql.connector;" > "/var/cons/incdb.py";
